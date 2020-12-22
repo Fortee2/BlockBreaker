@@ -3,43 +3,64 @@ package com.mygame.breaker;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Breaker extends ApplicationAdapter {
-
 	ShapeRenderer shapeRenderer;
-	Integer ballX = 51, xDir = 1, ballY = 50, yDir = 1, xSpeed = 5, ySpeed = 2 ;
+	Ball gameBall = new Ball();
+	OrthographicCamera camera;
+	Viewport viewport;
+	private final float wwidth = 1920f, wheight = 1080f;
 
 	@Override
 	public void create () {
+		gameBall.setPosition(new Point(51, 50));
+		gameBall.setSpeedX(5);
+		gameBall.setSpeedY(2);
+		gameBall.setRadius(20);
+
 		shapeRenderer = new ShapeRenderer();
+
+		setupCamera();
 	}
 
 	@Override
 	public void render () {
+		camera.update();
+		shapeRenderer.setProjectionMatrix(camera.combined);
 
 		Gdx.gl.glClearColor(1, 01, 01, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-		shapeRenderer.setColor(0,0,1,1);
-		shapeRenderer.circle(ballX, ballY,50);
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+		gameBall.draw(shapeRenderer);
 		shapeRenderer.end();
 
-		if(ballX + 50 > Gdx.graphics.getWidth()  || ballX - 50 < 0){
-			xDir = xDir * -1;
-		}
+		Point screenPoint = new Point(0,0);
 
-		if(ballY + 50 > Gdx.graphics.getHeight() || ballY < 50){
-			yDir = yDir * -1;
-		}
-
-		ballX = ballX + (xSpeed * xDir);
-		ballY = ballY + (ySpeed * yDir);
+		gameBall.collisionX(screenPoint, (int) wwidth);
+		gameBall.collisionY(screenPoint, (int) wheight);
 	}
-	
+
+	@Override
+	public void resize(int width, int height) {
+		viewport.update(width, height);
+		camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
+	}
+
 	@Override
 	public void dispose () {
 		shapeRenderer.dispose();
+	}
+
+	private void setupCamera(){
+		camera = new OrthographicCamera();  //We are going to use the game world diminsions.   The camera an the view port will allow the game to scale
+		viewport = new StretchViewport(wwidth,wheight,camera);
+		camera.position.set(wwidth/2, wheight/2,0);
+		viewport.apply();
 	}
 }
