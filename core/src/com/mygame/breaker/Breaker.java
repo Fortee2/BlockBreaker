@@ -15,6 +15,8 @@ public class Breaker extends ApplicationAdapter {
 	Paddle paddle = new Paddle();
 	OrthographicCamera camera;
 	Viewport viewport;
+	boolean useKeyboard = false;
+	Vector3 v3 = new Vector3();
 	private final float wwidth = 1920f, wheight = 1080f;
 
 	@Override
@@ -51,16 +53,28 @@ public class Breaker extends ApplicationAdapter {
 		gameBall.collisionX(screenPoint, (int) wwidth);
 		gameBall.collisionY(screenPoint, (int) wheight);
 
+
 		if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
 			Gdx.app.exit();
-		} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+		}
+
+		if(useKeyboard) {
+			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+				Point pt = paddle.getPosition();
+				pt.setX(pt.getX() - 10);
+				paddle.setPosition(pt);
+			} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+				Point pt = paddle.getPosition();
+				pt.setX(pt.getX() + 10);
+				paddle.setPosition(pt);
+			}
+		}else{
+			v3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+			camera.unproject(v3);
 			Point pt = paddle.getPosition();
-			pt.setX(pt.getX() - 10);
+			pt.setX((int) v3.x);
 			paddle.setPosition(pt);
-		} else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			Point pt = paddle.getPosition();
-			pt.setX(pt.getX() + 10);
-			paddle.setPosition(pt);
+
 		}
 
 		paddle.checkWalls(wwidth);
